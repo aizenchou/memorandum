@@ -18,16 +18,15 @@ public class DateChooser extends JPanel {
 	private JP2 jp2;
 	private JP3 jp3;
 	private JP4 jp4;
-	private Font font = new Font("宋体", Font.PLAIN, 12);
+	private Font font = new Font("微软雅黑", Font.PLAIN, 12);
 	private final LabelManager lm = new LabelManager();
 	private JLabel showDate;// ,toSelect;
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+	public SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 	private boolean isShow = false;
 	private Popup pop;
 
-	/**
-	 * Creates a new instance of DateChooser
-	 */
+
 	public DateChooser() {
 		this(new Date());
 	}
@@ -82,6 +81,7 @@ public class DateChooser extends JPanel {
 	// 初始化标签
 	private void initLabel() {
 		showDate = new JLabel(sdf.format(initDate));
+		showDate.setFont(new Font("微软雅黑", Font.BOLD, 20));
 		showDate.setRequestFocusEnabled(true);
 		showDate.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent me) {
@@ -149,6 +149,7 @@ public class DateChooser extends JPanel {
 	// 提交日期
 	private void commit() {
 		System.out.println("选中的日期是：" + sdf.format(select.getTime()));
+		System.out.println("选中的日期是：" + sdf2.format(select.getTime()));
 		showDate.setText(sdf.format(select.getTime()));
 		hidePanel();
 	}

@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.*;
-
+import javax.swing.border.TitledBorder;
 
 public class Memorandum extends JFrame implements ActionListener {
 	private JLabel dateLabel;
@@ -18,23 +18,35 @@ public class Memorandum extends JFrame implements ActionListener {
 	private int ONE_SECOND = 1000;
 	private JButton setMemButton;
 	private JButton minimizeButton;
+	private Font buttonFont = new Font("微软雅黑", Font.PLAIN, 13);
+	private Font dateFont = new Font("微软雅黑", Font.PLAIN, 16);
+	private Font timeFont = new Font("TimesRoman", Font.PLAIN, 40);
+	private Font borderFont = new Font("微软雅黑", Font.PLAIN, 15);
+	private TitledBorder todayMemBorder;
+	private JPanel memPanel;
 
 	public Memorandum() {
 		timePanel = new JPanel(null);
+		memPanel = new JPanel();
 		displayArea = new JLabel();
 		dateLabel = new JLabel();
 		setMemButton = new JButton("编辑备忘录");
 		minimizeButton = new JButton("最小化至托盘");
+		todayMemBorder = new TitledBorder("今日备忘");
 
 		configTimeArea();
 
 		dateLabel.setText(getDate());
-		dateLabel.setFont(new Font("微软雅黑", Font.PLAIN, 16));
-		displayArea.setFont(new Font("TimesRoman", Font.PLAIN, 40));
+		dateLabel.setFont(dateFont);
+		displayArea.setFont(timeFont);
+		todayMemBorder.setTitleFont(borderFont);
+		minimizeButton.setFont(buttonFont);
+		setMemButton.setFont(buttonFont);
 		minimizeButton.setBounds(150, 100, 130, 30);
 		setMemButton.setBounds(5, 100, 130, 30);
 		dateLabel.setBounds(0, 0, 300, 50);
 		displayArea.setBounds(0, 15, 300, 100);
+		memPanel.setBounds(0, 140, 285, 300);
 		dateLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		displayArea.setHorizontalAlignment(SwingConstants.CENTER);
 		setMemButton.addActionListener(this);
@@ -43,9 +55,11 @@ public class Memorandum extends JFrame implements ActionListener {
 		timePanel.add(displayArea);
 		timePanel.add(setMemButton);
 		timePanel.add(minimizeButton);
+		memPanel.setBorder(todayMemBorder);
+		timePanel.add(memPanel);
 		this.add(timePanel);
 		this.setTitle("日历备忘录");
-		this.setSize(300, 250);
+		this.setSize(300, 480);
 		this.setLocationRelativeTo(null);
 		this.setTray();
 		Image image1 = Toolkit.getDefaultToolkit().getImage(
@@ -145,6 +159,7 @@ public class Memorandum extends JFrame implements ActionListener {
 	public void Edit() {
 		DateChooser.setmem();
 	}
+
 	public void Exit() {
 		System.exit(0);
 	}
@@ -153,12 +168,9 @@ public class Memorandum extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		// TODO 自动生成的方法存根
 		Object obj = e.getSource();
-		if(obj == setMemButton)
-		{
+		if (obj == setMemButton) {
 			DateChooser.setmem();
-		}
-		else if(obj == minimizeButton)
-		{
+		} else if (obj == minimizeButton) {
 			this.setVisible(false);
 		}
 	}
