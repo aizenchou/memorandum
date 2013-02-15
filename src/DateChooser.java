@@ -81,7 +81,7 @@ public class DateChooser extends JPanel {
 	// ≥ı ºªØ±Í«©
 	private void initLabel() {
 		showDate = new JLabel(sdf.format(initDate));
-		showDate.setFont(new Font("Œ¢»Ì—≈∫⁄", Font.BOLD, 20));
+		showDate.setFont(new Font("Œ¢»Ì—≈∫⁄", Font.BOLD, 15));
 		showDate.setRequestFocusEnabled(true);
 		showDate.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent me) {
