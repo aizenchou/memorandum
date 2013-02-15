@@ -3,32 +3,27 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 
-public class SetMem extends JFrame implements ActionListener
-{
+public class SetMem extends JFrame implements ActionListener, KeyListener {
 
 	private DateChooser dc;
-	private JLabel staLabel, staHourLabel, staMinuteLabel, endLabel, endHourLabel, endMinuteLabel;
-        private SpinnerNumberModel staHourNumberModel, staMinuteNumberModel, endHourNumberModel, endMinuteNumberModel;
-	private JSpinner staHourSpinner, staMinuteSpinner, endHourSpinner, endMinuteSpinner;
+	private JLabel staLabel, staHourLabel, staMinuteLabel, endLabel,
+			endHourLabel, endMinuteLabel;
+	private SpinnerNumberModel staHourNumberModel, staMinuteNumberModel,
+			endHourNumberModel, endMinuteNumberModel;
+	private JSpinner staHourSpinner, staMinuteSpinner, endHourSpinner,
+			endMinuteSpinner;
 	private JTextArea memTextArea;
 	private JButton setButton, cancleButton;
-        private JPanel jp1;
-        private Font labelFont, buttonFont;
-	
-        public SetMem()
-	{
+	private JPanel jp1;
+	private Font labelFont, buttonFont;
+
+	public SetMem() {
 		init();
 	}
-	public void init()
-	{
+
+	public void init() {
 		labelFont = new Font("微软雅黑", Font.PLAIN, 15);
 		buttonFont = new Font("微软雅黑", Font.PLAIN, 13);
 		jp1 = new JPanel(null);
@@ -47,11 +42,11 @@ public class SetMem extends JFrame implements ActionListener
 		staMinuteSpinner = new JSpinner(staMinuteNumberModel);
 		endHourSpinner = new JSpinner(endHourNumberModel);
 		endMinuteSpinner = new JSpinner(endMinuteNumberModel);
-		memTextArea = new JTextArea("在这里输入备忘录信心");
+		memTextArea = new JTextArea("在这里输入备忘录信息");
 		memTextArea.setLineWrap(true);
 		setButton = new JButton("设置");
 		cancleButton = new JButton("取消");
-		
+
 		staLabel.setFont(labelFont);
 		staHourLabel.setFont(labelFont);
 		staMinuteLabel.setFont(labelFont);
@@ -60,30 +55,30 @@ public class SetMem extends JFrame implements ActionListener
 		endMinuteLabel.setFont(labelFont);
 		setButton.setFont(buttonFont);
 		cancleButton.setFont(buttonFont);
-		
+
 		dc.setBounds(0, 0, 285, 50);
-		
+
 		staLabel.setBounds(0, 60, 75, 25);
 		staHourSpinner.setBounds(100, 60, 50, 25);
 		staHourLabel.setBounds(165, 60, 25, 25);
 		staMinuteSpinner.setBounds(190, 60, 50, 25);
 		staMinuteLabel.setBounds(255, 60, 25, 25);
-		
+
 		endLabel.setBounds(0, 90, 75, 25);
 		endHourSpinner.setBounds(100, 90, 50, 25);
 		endHourLabel.setBounds(165, 90, 25, 25);
 		endMinuteSpinner.setBounds(190, 90, 50, 25);
 		endMinuteLabel.setBounds(255, 90, 25, 25);
-		
+
 		memTextArea.setBounds(0, 125, 285, 75);
-		
+
 		setButton.setBounds(100, 210, 75, 25);
 		cancleButton.setBounds(200, 210, 75, 25);
-		
+
 		setButton.addActionListener(this);
 		cancleButton.addActionListener(this);
 		memTextArea.addKeyListener(this);
-		
+
 		jp1.add(dc);
 		jp1.add(staLabel);
 		jp1.add(staHourSpinner);
@@ -103,47 +98,51 @@ public class SetMem extends JFrame implements ActionListener
 		this.setSize(300, 280);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
-//		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
-	
+		// this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-        public void set()
-	{
+	public void set() {
 		ConnectMySQL.connSQL();
 		String selectDate = dc.sdf2.format(dc.select.getTime());
-		String selectStaTime = staHourSpinner.getValue().toString()+staMinuteSpinner.getValue().toString();
-		String selectEndTime = endHourSpinner.getValue().toString()+endMinuteSpinner.getValue().toString();
+		String selectStaTime = staHourSpinner.getValue().toString()
+				+ staMinuteSpinner.getValue().toString();
+		String selectEndTime = endHourSpinner.getValue().toString()
+				+ endMinuteSpinner.getValue().toString();
 		String selectMem = memTextArea.getText();
-		ConnectMySQL.insertSQL(selectDate, selectStaTime, selectEndTime, selectMem);
-		
+		if (ConnectMySQL.insertSQL(selectDate, selectStaTime, selectEndTime,
+				selectMem)) {
+			JOptionPane.showInternalMessageDialog(this.getContentPane(),
+					"插入数据成功！", "information", JOptionPane.INFORMATION_MESSAGE);
+
+		}
+
 	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO 自动生成的方法存根
 		Object obj = e.getSource();
 		if (obj == setButton) {
-		    set();
-		}
-		else if (obj == cancleButton) {
+			set();
+		} else if (obj == cancleButton) {
 			this.setVisible(false);
-		} 
+		}
 	}
-	public static void main(String[] args)
-	{
+
+	public static void main(String[] args) {
 		new SetMem();
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO 自动生成的方法存根
-		
+
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
 		// TODO 自动生成的方法存根
-		if(e.getKeyCode()==10)
-		{
+		if (e.getKeyCode() == 10) {
 			memTextArea.append("\r");
 		}
 	}
@@ -151,6 +150,6 @@ public class SetMem extends JFrame implements ActionListener
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO 自动生成的方法存根
-		
+
 	}
 }

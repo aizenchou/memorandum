@@ -29,7 +29,7 @@ public class Memorandum extends JFrame implements ActionListener {
 	{
 		init();
 	}
-	
+
 	public void init() {
 		timePanel = new JPanel(null);
 		memPanel = new JPanel();

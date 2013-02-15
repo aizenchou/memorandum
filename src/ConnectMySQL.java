@@ -56,7 +56,8 @@ public class ConnectMySQL {
 	}
 
 	// execute insertion language
-	public static boolean insertSQL(String date, String timestart, String timeend, String text) {
+	public static boolean insertSQL(String date, String timestart,
+			String timeend, String text) {
 		String sql = "insert into datetable values('" + date + "','"
 				+ timestart + "','" + timeend + "','" + text + "')";
 		try {
@@ -104,7 +105,6 @@ public class ConnectMySQL {
 		}
 		return false;
 	}
-
 
 	void layoutStyle2(ResultSet rs) {
 		System.out.println("-----------------");

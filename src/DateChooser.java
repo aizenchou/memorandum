@@ -12,7 +12,7 @@ import javax.swing.event.*;
 public class DateChooser extends JPanel {
 	private Date initDate;
 	private Calendar now = Calendar.getInstance();
-	private Calendar select;
+	public Calendar select;
 	private JPanel monthPanel;// 月历
 	private JP1 jp1;// 四块面板,组成
 	private JP2 jp2;
@@ -25,7 +25,6 @@ public class DateChooser extends JPanel {
 	public SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 	private boolean isShow = false;
 	private Popup pop;
-
 
 	public DateChooser() {
 		this(new Date());
@@ -81,7 +80,7 @@ public class DateChooser extends JPanel {
 	// 初始化标签
 	private void initLabel() {
 		showDate = new JLabel(sdf.format(initDate));
-		showDate.setFont(new Font("微软雅黑", Font.BOLD, 15));
+		showDate.setFont(new Font("微软雅黑", Font.BOLD, 18));
 		showDate.setRequestFocusEnabled(true);
 		showDate.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent me) {
