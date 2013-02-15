@@ -25,7 +25,12 @@ public class Memorandum extends JFrame implements ActionListener {
 	private TitledBorder todayMemBorder;
 	private JPanel memPanel;
 
-	public Memorandum() {
+	public Memorandum()
+	{
+		init();
+	}
+	
+	public void init() {
 		timePanel = new JPanel(null);
 		memPanel = new JPanel();
 		displayArea = new JLabel();
@@ -157,7 +162,7 @@ public class Memorandum extends JFrame implements ActionListener {
 	}
 
 	public void Edit() {
-		DateChooser.setmem();
+		new SetMem();
 	}
 
 	public void Exit() {
@@ -169,9 +174,9 @@ public class Memorandum extends JFrame implements ActionListener {
 		// TODO 自动生成的方法存根
 		Object obj = e.getSource();
 		if (obj == setMemButton) {
-			DateChooser.setmem();
+			Edit();
 		} else if (obj == minimizeButton) {
-			this.setVisible(false);
+			UnVisible();
 		}
 	}
 
