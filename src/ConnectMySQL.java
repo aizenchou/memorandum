@@ -1,15 +1,12 @@
-import java.beans.Statement;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class ConnectMySQL {
 	private static Connection conn = null;
 	public static PreparedStatement statement = null;
 
-	// connect to MySQL
+	// 连接数据库
 	public static void connSQL() {
 		String url = "jdbc:mysql://localhost:3306/men?characterEncoding=UTF-8";
 		String username = "date";
@@ -31,7 +28,7 @@ public class ConnectMySQL {
 		}
 	}
 
-	// disconnect to MySQL
+	// 断开连接
 	public static void deconnSQL() {
 		try {
 			if (conn != null)
@@ -43,7 +40,7 @@ public class ConnectMySQL {
 		}
 	}
 
-	// execute selection language
+	// 返回结果集
 	public static ResultSet selectSQL(String sql) {
 		ResultSet rs = null;
 		try {
@@ -55,7 +52,7 @@ public class ConnectMySQL {
 		return rs;
 	}
 
-	// execute insertion language
+	// 插入数据，参数为字段名
 	public static boolean insertSQL(String date, String timestart,
 			String timeend, String text) {
 		String sql = "insert into datetable values('" + date + "','"
@@ -74,7 +71,7 @@ public class ConnectMySQL {
 		return false;
 	}
 
-	// execute delete language
+	// 删除数据
 	public static boolean deleteSQL(String sql) {
 		try {
 			statement = conn.prepareStatement(sql);
@@ -90,7 +87,7 @@ public class ConnectMySQL {
 		return false;
 	}
 
-	// execute update language
+	// 更新数据
 	public static boolean updateSQL(String sql) {
 		try {
 			statement = conn.prepareStatement(sql);
@@ -106,51 +103,25 @@ public class ConnectMySQL {
 		return false;
 	}
 
-	void layoutStyle2(ResultSet rs) {
-		System.out.println("-----------------");
-		System.out.println("执行结果如下所示:");
-		System.out.println("-----------------");
-		// System.out.println(" 用户ID" + "/t/t" + "淘宝ID" + "/t/t" + "用户名"+ "/t/t"
-		// + "密码");
-		System.out.println("-----------------");
-		try {
-			while (rs.next()) {
-				System.out.println(rs.getString("date") + "/t/t"
-						+ rs.getString("timestart") + "/t/t"
-						+ rs.getString("timeend") + "/t/t"
-						+ rs.getString("text"));
-			}
-		} catch (SQLException e) {
-			System.out.println("显示时数据库出错。");
-			e.printStackTrace();
-		} catch (Exception e) {
-			System.out.println("显示出错。");
-			e.printStackTrace();
-		}
+	public static ResultSet getTodayResultSet() {
+		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMdd");
+		String currentDate = null;
+		currentDate = sdfDate.format(Calendar.getInstance().getTime());
+		// System.out.println(currentDate);
+		ResultSet rs = selectSQL("select * from datetable where date='"
+				+ currentDate + "'");
+		return rs;
 	}
 
-	public static void main(String args[]) {
-
-		ConnectMySQL h = new ConnectMySQL();
-		h.connSQL();
-		String s = "select * from datetable";
-
-		// String insert =
-		// "insert into datetable values('20130214','3333','3333','顶得到地方的发的')";
-		String delete = "delete from datetable where date= '20130214'";
-
-		if (h.insertSQL("20130214", "3333", "3333", "水水水水") == true) {
-			System.out.println("insert successfully");
-			ResultSet resultSet = h.selectSQL(s);
-			h.layoutStyle2(resultSet);
-		}
-
-		if (h.deleteSQL(delete) == true) {
-			System.out.println("delete successfully");
-			ResultSet resultSet = h.selectSQL(s);
-			h.layoutStyle2(resultSet);
-		}
-
-		h.deconnSQL();
+	public static ResultSet getNowResultSet() {
+		SimpleDateFormat sdfTime = new SimpleDateFormat("HHmm");
+		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMdd");
+		String currentDate = null, currentTime = null;
+		currentDate = sdfDate.format(Calendar.getInstance().getTime());
+		currentTime = sdfTime.format(Calendar.getInstance().getTime());
+		ResultSet rs = selectSQL("select * from datetable where date='"
+				+ currentDate + "' and timestart='" + currentTime + "'");
+		return rs;
 	}
+
 }

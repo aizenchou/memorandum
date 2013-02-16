@@ -530,7 +530,7 @@ public class DateChooser extends JPanel {
 		}
 	}
 
-	public static void setmem() {
+	public static void main(String[] args) {
 		final DateChooser mp = new DateChooser();
 		JFrame jf = new JFrame("test");
 		jf.add(mp, BorderLayout.CENTER);

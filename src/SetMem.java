@@ -98,24 +98,45 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 		this.setSize(300, 280);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
-		// this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+     // this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public void set() {
 		ConnectMySQL.connSQL();
 		String selectDate = dc.sdf2.format(dc.select.getTime());
-		String selectStaTime = staHourSpinner.getValue().toString()
-				+ staMinuteSpinner.getValue().toString();
-		String selectEndTime = endHourSpinner.getValue().toString()
-				+ endMinuteSpinner.getValue().toString();
+		String str1 = null, str2 = null, str3 = null, str4 = null;
+		if ((Integer) staHourSpinner.getValue() < 10) {
+			str1 = '0' + staHourSpinner.getValue().toString();
+		} else {
+			str1 = staHourSpinner.getValue().toString();
+		}
+		if ((Integer) staMinuteSpinner.getValue() < 10) {
+			str2 = '0' + staMinuteSpinner.getValue().toString();
+		} else {
+			str2 = staMinuteSpinner.getValue().toString();
+		}
+		if ((Integer) endHourSpinner.getValue() < 10) {
+			str3 = '0' + endHourSpinner.getValue().toString();
+		} else {
+			str3 = endHourSpinner.getValue().toString();
+		}
+		if ((Integer) endMinuteSpinner.getValue() < 10) {
+			str4 = '0' + endMinuteSpinner.getValue().toString();
+		} else {
+			str4 = endMinuteSpinner.getValue().toString();
+		}
+		String selectStaTime = str1 + str2;
+		String selectEndTime = str3 + str4;
 		String selectMem = memTextArea.getText();
 		if (ConnectMySQL.insertSQL(selectDate, selectStaTime, selectEndTime,
 				selectMem)) {
 			JOptionPane.showInternalMessageDialog(this.getContentPane(),
-					"插入数据成功！", "information", JOptionPane.INFORMATION_MESSAGE);
-
+					"插入数据成功！", "Information:", JOptionPane.INFORMATION_MESSAGE);
+			this.setVisible(false);
+		} else {
+			JOptionPane.showMessageDialog(null, "数据插入失败！", "Error:",
+					JOptionPane.ERROR_MESSAGE);
 		}
-
 	}
 
 	@Override
@@ -136,7 +157,6 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO 自动生成的方法存根
-
 	}
 
 	@Override
@@ -150,6 +170,5 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO 自动生成的方法存根
-
 	}
 }

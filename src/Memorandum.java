@@ -1,19 +1,23 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.*;
 
 public class Memorandum extends JFrame implements ActionListener {
 	private JLabel dateLabel;
 	private JPanel timePanel;
 	private JLabel displayArea;
 	private String DEFAULT_TIME_FORMAT = "HH:mm:ss";
+	public SimpleDateFormat sdfTime = new SimpleDateFormat("HHmm");
+	public SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMdd");
+	public SimpleDateFormat sdfSecond = new SimpleDateFormat("ss");
 	private String time;
 	private int ONE_SECOND = 1000;
 	private JButton setMemButton;
@@ -24,9 +28,14 @@ public class Memorandum extends JFrame implements ActionListener {
 	private Font borderFont = new Font("微软雅黑", Font.PLAIN, 15);
 	private TitledBorder todayMemBorder;
 	private JPanel memPanel;
+	public ScrollPane tableScrollPanel;
+	public JTable memTable;
+	String[] Names = { "起始时间", "截止时间", "备忘信息" };
+	Object[][] playerInfo = null;
 
-	public Memorandum()
-	{
+	public ResultSet todayResultSet, nowResultSet;
+
+	public Memorandum() {
 		init();
 	}
 
@@ -38,8 +47,24 @@ public class Memorandum extends JFrame implements ActionListener {
 		setMemButton = new JButton("编辑备忘录");
 		minimizeButton = new JButton("最小化至托盘");
 		todayMemBorder = new TitledBorder("今日备忘");
+		DefaultTableModel model = new DefaultTableModel(playerInfo, Names) {
 
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		memTable = new JTable(model);
+		memTable.setPreferredScrollableViewportSize(new Dimension(270, 245));
+		JScrollPane scrollPane = new JScrollPane(memTable);
+		memTable.setDefaultRenderer(Object.class,
+				new TableCellTextAreaRenderer()); // 增加自动换行属性
+		/*
+		 * DefaultTableCellRenderer r = new DefaultTableCellRenderer();
+		 * r.setHorizontalAlignment(JLabel.CENTER);
+		 * memTable.setDefaultRenderer(Object.class, r); //使表格居中，但会覆盖换行属性
+		 */
 		configTimeArea();
+		configTable();
 
 		dateLabel.setText(getDate());
 		dateLabel.setFont(dateFont);
@@ -52,6 +77,7 @@ public class Memorandum extends JFrame implements ActionListener {
 		dateLabel.setBounds(0, 0, 300, 50);
 		displayArea.setBounds(0, 15, 300, 100);
 		memPanel.setBounds(0, 140, 285, 300);
+		memTable.setBounds(5, 20, 275, 275);
 		dateLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		displayArea.setHorizontalAlignment(SwingConstants.CENTER);
 		setMemButton.addActionListener(this);
@@ -61,6 +87,7 @@ public class Memorandum extends JFrame implements ActionListener {
 		timePanel.add(setMemButton);
 		timePanel.add(minimizeButton);
 		memPanel.setBorder(todayMemBorder);
+		memPanel.add(scrollPane, BorderLayout.CENTER);
 		timePanel.add(memPanel);
 		this.add(timePanel);
 		this.setTitle("日历备忘录");
@@ -71,6 +98,7 @@ public class Memorandum extends JFrame implements ActionListener {
 				getClass().getResource("/trayIconImage/image.png"));
 		setIconImage(image1);
 		this.setVisible(true);
+		// this.setResizable(false); //使窗口不能改变大小
 	}
 
 	private void configTimeArea() {
@@ -86,6 +114,8 @@ public class Memorandum extends JFrame implements ActionListener {
 		public void run() {
 			time = dateFormatter.format(Calendar.getInstance().getTime());
 			displayArea.setText(time);
+			remind();
+			updateTable();
 		}
 	}
 
@@ -96,6 +126,64 @@ public class Memorandum extends JFrame implements ActionListener {
 		m = cal.get(Calendar.MONTH);
 		d = cal.get(Calendar.DATE);
 		return y + "年" + m + "月" + d + "日";
+	}
+
+	public void remind() {
+		String currentSecond = sdfSecond.format(
+				Calendar.getInstance().getTime()).toString();
+		nowResultSet = ConnectMySQL.getNowResultSet();
+		// System.out.println(currentSecond);
+		if (currentSecond.equals("00")) {
+			try {
+				if (nowResultSet.next()) {
+					new Clip();
+				} else {
+				}
+			} catch (SQLException e) {
+				// TODO 自动生成的 catch 块
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void configTable() {
+		TableColumn firsetColumn = memTable.getColumnModel().getColumn(0);
+		TableColumn secondColumn = memTable.getColumnModel().getColumn(1);
+		firsetColumn.setPreferredWidth(55);
+		firsetColumn.setMaxWidth(55);
+		firsetColumn.setMinWidth(55);
+		secondColumn.setPreferredWidth(55);
+		secondColumn.setMaxWidth(55);
+		secondColumn.setMinWidth(55);
+	}
+
+	public void updateTable() {
+		String currentSecond = sdfSecond.format(
+				Calendar.getInstance().getTime()).toString();
+
+		// System.out.println(currentSecond);
+		if (currentSecond.equals("00")) {
+			updateTableRightNow();
+		}
+	}
+
+	public void updateTableRightNow() {
+		todayResultSet = ConnectMySQL.getTodayResultSet();
+		try {
+			while (todayResultSet.next()) {
+				DefaultTableModel tableModel = (DefaultTableModel) memTable
+						.getModel();
+				String timesta = todayResultSet.getString("timestart");
+				String timeend = todayResultSet.getString("timeend");
+				String memtext = todayResultSet.getString("text");
+				tableModel.addRow(new Object[] {
+						Clip.insertStr(timesta, 2, ":"),
+						Clip.insertStr(timeend, 2, ":"), memtext });
+			}
+		} catch (SQLException e) {
+			// TODO 自动生成的 catch 块
+			e.printStackTrace();
+		}
 	}
 
 	// 添加托盘显示：1.先判断当前平台是否支持托盘显示
@@ -166,6 +254,7 @@ public class Memorandum extends JFrame implements ActionListener {
 	}
 
 	public void Exit() {
+		ConnectMySQL.deconnSQL();
 		System.exit(0);
 	}
 
@@ -181,7 +270,8 @@ public class Memorandum extends JFrame implements ActionListener {
 	}
 
 	public static void main(String[] args) {
-		new Memorandum();
+		ConnectMySQL.connSQL();
+		Memorandum memorandum = new Memorandum();
 	}
 
 }
