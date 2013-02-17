@@ -22,15 +22,16 @@ public class Clip extends Frame {
 			aau.loop();
 			ConnectMySQL.connSQL();
 			ResultSet rs = ConnectMySQL.getNowResultSet();
-			rs.next();
-			String title1 = rs.getString("timestart");
-			String title2 = rs.getString("timeend");
-			JOptionPane.showConfirmDialog(
-					null,
-					rs.getString("text"),
-					insertStr(title1, 2, "点") + "分 到 "
-							+ insertStr(title2, 2, "点") + "分 的备忘信息",
-					JOptionPane.YES_NO_OPTION);
+			while (rs.next()) {
+				String title1 = rs.getString("timestart");
+				String title2 = rs.getString("timeend");
+				JOptionPane.showConfirmDialog(
+						null,
+						rs.getString("text"),
+						insertStr(title1, 2, "点") + "分 到 "
+								+ insertStr(title2, 2, "点") + "分 的备忘信息",
+						JOptionPane.YES_NO_OPTION);
+			}
 			aau.stop();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

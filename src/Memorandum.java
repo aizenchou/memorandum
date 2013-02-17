@@ -32,11 +32,13 @@ public class Memorandum extends JFrame implements ActionListener {
 	public JTable memTable;
 	String[] Names = { "起始时间", "截止时间", "备忘信息" };
 	Object[][] playerInfo = null;
+	private static int flag = 0;
 
 	public ResultSet todayResultSet, nowResultSet;
 
 	public Memorandum() {
 		init();
+		updateTableRightNow();
 	}
 
 	public void init() {
@@ -115,7 +117,11 @@ public class Memorandum extends JFrame implements ActionListener {
 			time = dateFormatter.format(Calendar.getInstance().getTime());
 			displayArea.setText(time);
 			remind();
-			updateTable();
+			flag++;
+			if (flag > 10) {
+				updateTable();
+				flag = 0;
+			}
 		}
 	}
 
@@ -160,10 +166,26 @@ public class Memorandum extends JFrame implements ActionListener {
 	public void updateTable() {
 		String currentSecond = sdfSecond.format(
 				Calendar.getInstance().getTime()).toString();
-
-		// System.out.println(currentSecond);
-		if (currentSecond.equals("00")) {
-			updateTableRightNow();
+		todayResultSet = ConnectMySQL.getTodayResultSet();
+		int SQLcount = 0;
+		try {
+			while (todayResultSet.next())
+				SQLcount++;
+		} catch (SQLException e1) {
+			// TODO 自动生成的 catch 块
+			e1.printStackTrace();
+		}
+		System.out.println(SQLcount);
+		System.out.println(memTable.getRowCount());
+		if (SQLcount != memTable.getRowCount()) {
+			deleteAllRows();
+			try {
+				Thread.sleep(10000); // JTable资源处理速度如果过快，会发生数组越界的情况，所以添加sleep(10000)，时间短了也不行，如果不添加，会抛出异常，但是不会出错
+				updateTableRightNow();
+			} catch (InterruptedException e) {
+				// TODO 自动生成的 catch 块
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -183,6 +205,15 @@ public class Memorandum extends JFrame implements ActionListener {
 		} catch (SQLException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();
+		}
+	}
+
+	public void deleteAllRows() {
+		int rowCount = memTable.getRowCount();
+		// System.out.println(rowCount);
+		DefaultTableModel tableModel = (DefaultTableModel) memTable.getModel();
+		for (int i = 0; i < rowCount; i++) {
+			tableModel.removeRow((memTable.getRowCount() - 1));
 		}
 	}
 
