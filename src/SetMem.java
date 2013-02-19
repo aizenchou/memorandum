@@ -3,7 +3,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class SetMem extends JFrame implements ActionListener, KeyListener {
 
@@ -15,7 +20,7 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 	private JSpinner staHourSpinner, staMinuteSpinner, endHourSpinner,
 			endMinuteSpinner;
 	private JTextArea memTextArea;
-	private JButton setButton, cancleButton;
+	private JButton setButton, cancleButton, deleteButton;
 	private JPanel jp1;
 	private Font labelFont, buttonFont;
 
@@ -42,10 +47,28 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 		staMinuteSpinner = new JSpinner(staMinuteNumberModel);
 		endHourSpinner = new JSpinner(endHourNumberModel);
 		endMinuteSpinner = new JSpinner(endMinuteNumberModel);
-		memTextArea = new JTextArea("在这里输入备忘录信息");
+		memTextArea = new JTextArea("请在这里输入备忘录信息");
 		memTextArea.setLineWrap(true);
 		setButton = new JButton("设置");
 		cancleButton = new JButton("取消");
+		deleteButton = new JButton("删除");
+		ChangeListener listener = new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				ResultSet selectedResultSet = ConnectMySQL
+						.getSelectedResultSet(dc, staHourSpinner,
+								staMinuteSpinner, endHourSpinner,
+								endMinuteSpinner);
+				try {
+					if (selectedResultSet.next()) {
+						memTextArea
+								.setText(selectedResultSet.getString("text"));
+					}
+				} catch (SQLException e1) {
+					// TODO 自动生成的 catch 块
+					e1.printStackTrace();
+				}
+			}
+		};
 
 		staLabel.setFont(labelFont);
 		staHourLabel.setFont(labelFont);
@@ -55,6 +78,7 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 		endMinuteLabel.setFont(labelFont);
 		setButton.setFont(buttonFont);
 		cancleButton.setFont(buttonFont);
+		deleteButton.setFont(buttonFont);
 
 		dc.setBounds(0, 0, 285, 50);
 
@@ -72,11 +96,13 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 
 		memTextArea.setBounds(0, 125, 285, 75);
 
-		setButton.setBounds(100, 210, 75, 25);
-		cancleButton.setBounds(200, 210, 75, 25);
+		deleteButton.setBounds(5, 210, 75, 25);
+		setButton.setBounds(105, 210, 75, 25);
+		cancleButton.setBounds(205, 210, 75, 25);
 
 		setButton.addActionListener(this);
 		cancleButton.addActionListener(this);
+		deleteButton.addActionListener(this);
 		memTextArea.addKeyListener(this);
 
 		jp1.add(dc);
@@ -93,12 +119,17 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 		jp1.add(memTextArea);
 		jp1.add(setButton);
 		jp1.add(cancleButton);
+		jp1.add(deleteButton);
+		staHourNumberModel.addChangeListener(listener);
+		staMinuteNumberModel.addChangeListener(listener);
+		endHourNumberModel.addChangeListener(listener);
+		endMinuteNumberModel.addChangeListener(listener);
 		this.add(jp1);
 		this.setTitle("备忘录设置");
 		this.setSize(300, 280);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
-     // this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public void set() {
@@ -128,13 +159,68 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 		String selectStaTime = str1 + str2;
 		String selectEndTime = str3 + str4;
 		String selectMem = memTextArea.getText();
-		if (ConnectMySQL.insertSQL(selectDate, selectStaTime, selectEndTime,
-				selectMem)) {
-			JOptionPane.showInternalMessageDialog(this.getContentPane(),
-					"插入数据成功！", "Information:", JOptionPane.INFORMATION_MESSAGE);
-			this.setVisible(false);
+		try {
+			if (ConnectMySQL.getSelectedResultSet(dc, staHourSpinner,
+					staMinuteSpinner, endHourSpinner, endMinuteSpinner).next()) {
+				if (ConnectMySQL.updateSQL(selectDate, selectStaTime,
+						selectEndTime, selectMem)) {
+					JOptionPane.showInternalMessageDialog(
+							this.getContentPane(), "修改数据成功！", "Information:",
+							JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(null, "数据修改失败！", "Error:",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+
+			else if (ConnectMySQL.insertSQL(selectDate, selectStaTime,
+					selectEndTime, selectMem)) {
+				JOptionPane.showInternalMessageDialog(this.getContentPane(),
+						"插入数据成功！", "Information:",
+						JOptionPane.INFORMATION_MESSAGE);
+				this.setVisible(false);
+			} else {
+				JOptionPane.showMessageDialog(null, "数据插入失败！", "Error:",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		} catch (SQLException e) {
+			// TODO 自动生成的 catch 块
+			e.printStackTrace();
+		}
+	}
+
+	public void delete() {
+		ConnectMySQL.connSQL();
+		String selectDate = dc.sdf2.format(dc.select.getTime());
+		String str1 = null, str2 = null, str3 = null, str4 = null;
+		if ((Integer) staHourSpinner.getValue() < 10) {
+			str1 = '0' + staHourSpinner.getValue().toString();
 		} else {
-			JOptionPane.showMessageDialog(null, "数据插入失败！", "Error:",
+			str1 = staHourSpinner.getValue().toString();
+		}
+		if ((Integer) staMinuteSpinner.getValue() < 10) {
+			str2 = '0' + staMinuteSpinner.getValue().toString();
+		} else {
+			str2 = staMinuteSpinner.getValue().toString();
+		}
+		if ((Integer) endHourSpinner.getValue() < 10) {
+			str3 = '0' + endHourSpinner.getValue().toString();
+		} else {
+			str3 = endHourSpinner.getValue().toString();
+		}
+		if ((Integer) endMinuteSpinner.getValue() < 10) {
+			str4 = '0' + endMinuteSpinner.getValue().toString();
+		} else {
+			str4 = endMinuteSpinner.getValue().toString();
+		}
+		String selectStaTime = str1 + str2;
+		String selectEndTime = str3 + str4;
+		if (ConnectMySQL.deleteSQL(selectDate, selectStaTime, selectEndTime)) {
+			JOptionPane.showInternalMessageDialog(this.getContentPane(),
+					"删除数据成功！", "Information:", JOptionPane.INFORMATION_MESSAGE);
+			memTextArea.setText("请在这里输入备忘录信息");
+		} else {
+			JOptionPane.showMessageDialog(null, "数据删除失败！", "Error:",
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}
@@ -147,10 +233,13 @@ public class SetMem extends JFrame implements ActionListener, KeyListener {
 			set();
 		} else if (obj == cancleButton) {
 			this.setVisible(false);
+		} else if (obj == deleteButton) {
+			delete();
 		}
 	}
 
 	public static void main(String[] args) {
+		ConnectMySQL.connSQL();
 		new SetMem();
 	}
 

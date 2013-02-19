@@ -164,8 +164,6 @@ public class Memorandum extends JFrame implements ActionListener {
 	}
 
 	public void updateTable() {
-		String currentSecond = sdfSecond.format(
-				Calendar.getInstance().getTime()).toString();
 		todayResultSet = ConnectMySQL.getTodayResultSet();
 		int SQLcount = 0;
 		try {
@@ -180,7 +178,7 @@ public class Memorandum extends JFrame implements ActionListener {
 		if (SQLcount != memTable.getRowCount()) {
 			deleteAllRows();
 			try {
-				Thread.sleep(10000); // JTable资源处理速度如果过快，会发生数组越界的情况，所以添加sleep(10000)，时间短了也不行，如果不添加，会抛出异常，但是不会出错
+				Thread.sleep(5000); // JTable资源处理速度如果过快，会发生数组越界的情况，所以添加sleep(10000)，时间短了也不行，如果不添加，会抛出异常，但是不会出错
 				updateTableRightNow();
 			} catch (InterruptedException e) {
 				// TODO 自动生成的 catch 块
